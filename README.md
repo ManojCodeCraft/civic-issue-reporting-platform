@@ -711,11 +711,15 @@ We welcome contributions! Please follow these steps:
 ### **Project Team**
 
 **Student:** Aulakagari Manoj Kumar 
+
 **Roll Number:** 22AT1A0508 
+
 **Department:** Computer Science and Engineering  
+
 **Institution:** G. Pullaiah College of Engineering and Technology, Kurnool
 
 **Project Guide:** Dr.C.Ranjeeth Kumar Dean-Innovation & Entrepreneurship || AI Skill Development Head & Trainer- RMJIT Solutions || Thesis Supervisor@GGU, CA || NVIDIA Certified Coach-Generative AI & LLMs || NVIDIA certified instructor   
+
 **Department:** Computer Science and Engineering
 
 ### **Contact**
