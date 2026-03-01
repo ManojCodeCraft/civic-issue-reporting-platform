@@ -838,7 +838,7 @@ Development Time:   6 months
 
 **📧 Questions? Feedback? Reach out!**
 
-[Email](aulakagarimanojkumar@gmail.com) • [LinkedIn](https://www.linkedin.com/in/manoj-kumar-a-21ab69258/)• [GitHub]([https://github.com/yourusername](https://github.com/ManojCodeCraft))
+[Email](aulakagarimanojkumar@gmail.com) • [LinkedIn](https://www.linkedin.com/in/manoj-kumar-a-21ab69258/)• [GitHub](https://github.com/yourusername](https://github.com/ManojCodeCraft))
 
 </div>
 
