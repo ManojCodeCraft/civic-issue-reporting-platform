@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>👤 Citizen Dashboard</h1>
+                <p>Welcome back, <strong>
+                        <%= user.name %>
+                    </strong>!</p>
+            </div>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (success && success.length> 0) { %>
+                        <div class="alert alert-success">
+                            <%= success %>
+                        </div>
+                        <% } %>
+
+                            <!-- Stats Cards -->
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon">📊</div>
+                                    <div class="stat-content">
+                                        <h3>
+                                            <%= stats.total %>
+                                        </h3>
+                                        <p>Total Issues</p>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card">
+                                    <div class="stat-icon">📝</div>
+                                    <div class="stat-content">
+                                        <h3>
+                                            <%= stats.reported %>
+                                        </h3>
+                                        <p>Reported</p>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card">
+                                    <div class="stat-icon">🔧</div>
+                                    <div class="stat-content">
+                                        <h3>
+                                            <%= stats.inProgress %>
+                                        </h3>
+                                        <p>In Progress</p>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card">
+                                    <div class="stat-icon">✅</div>
+                                    <div class="stat-content">
+                                        <h3>
+                                            <%= stats.resolved %>
+                                        </h3>
+                                        <p>Resolved</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="quick-actions">
+                                <a href="/citizen/submit-issue" class="btn btn-primary">
+                                    ➕ Submit New Issue
+                                </a>
+                                <a href="/citizen/view-issues" class="btn btn-secondary">
+                                    📋 View All Issues
+                                </a>
+                            </div>
+
+                            <!-- Recent Issues -->
+                            <div class="section">
+                                <h2>Recent Issues</h2>
+
+                                <% if (issues.length> 0) { %>
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Issue ID</th>
+                                                    <th>Category</th>
+                                                    <th>Status</th>
+                                                    <th>Submitted</th>
+                                                    <th>SLA Deadline</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% issues.forEach(issue=> { %>
+                                                    <tr>
+                                                        <td><strong>
+                                                                <%= issue.issueId %>
+                                                            </strong></td>
+                                                        <td><span class="badge badge-info">
+                                                                <%= issue.category %>
+                                                            </span></td>
+                                                        <td>
+                                                            <span
+                                                                class="badge badge-<%= issue.status.toLowerCase().replace(/ /g, '-') %>">
+                                                                <%= issue.status %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <%= new Date(issue.createdAt).toLocaleDateString() %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (issue.checkOverdue()) { %>
+                                                                <span class="badge badge-danger">Overdue</span>
+                                                                <% } else { %>
+                                                                    <%= new Date(issue.slaDeadline).toLocaleDateString()
+                                                                        %>
+                                                                        <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <a href="/citizen/issue/<%= issue._id %>"
+                                                                class="btn btn-sm btn-outline">
+                                                                View
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <% } else { %>
+                                        <div class="empty-state">
+                                            <p>📭 No issues submitted yet</p>
+                                            <a href="/citizen/submit-issue" class="btn btn-primary">Submit Your First
+                                                Issue</a>
+                                        </div>
+                                        <% } %>
+                            </div>
+        </div>
+
+        <%- include('../partials/footer') %>
+</body>
+
+</html>

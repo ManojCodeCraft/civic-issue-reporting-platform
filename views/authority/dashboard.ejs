@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="dashboard-container">
+            <div class="dashboard-header">
+                <h1>🏢 Authority Dashboard</h1>
+                <p>Welcome, <strong>
+                        <%= user.name %>
+                    </strong> | Department: <strong>
+                        <%= user.department %>
+                    </strong></p>
+            </div>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (success && success.length> 0) { %>
+                        <div class="alert alert-success">
+                            <%= success %>
+                        </div>
+                        <% } %>
+
+                            <!-- Stats Cards -->
+                            <div class="stats-grid stats-grid-6">
+                                <div class="stat-card">
+                                    <div class="stat-icon">📊</div>
+                                    <div class="stat-content">
+                                        <h3>
+                                            <%= stats.total %>
+                                        </h3>
+                                        <p>Total Assigned</p>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card stat-warning">
+                                    <div class="stat-icon">⏳</div>
+                                    <div class="stat-content">
+                                        <h3>
+                                            <%= stats.pending %>
+                                        </h3>
+                                        <p>Pending</p>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card stat-danger">
+                                    <div class="stat-icon">⚠️</div>
+                                    <div class="stat-content">
+                                        <h3>
+                                            <%= stats.overdue %>
+                                        </h3>
+                                        <p>Overdue</p>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card" style="border-left: 4px solid #dc2626;">
+                                    <div class="stat-icon">🚨</div>
+                                    <div class="stat-content">
+                                        <h3 style="color: #dc2626;">
+                                            <%= stats.critical %>
+                                        </h3>
+                                        <p>Critical Priority</p>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card" style="border-left: 4px solid #ea580c;">
+                                    <div class="stat-icon">🔥</div>
+                                    <div class="stat-content">
+                                        <h3 style="color: #ea580c;">
+                                            <%= stats.high %>
+                                        </h3>
+                                        <p>High Priority</p>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card stat-success">
+                                    <div class="stat-icon">✅</div>
+                                    <div class="stat-content">
+                                        <h3>
+                                            <%= stats.resolved %>
+                                        </h3>
+                                        <p>Resolved</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <style>
+                                .stats-grid-6 {
+                                    grid-template-columns: repeat(6, 1fr);
+                                }
+
+                                @media (max-width: 1024px) {
+                                    .stats-grid-6 {
+                                        grid-template-columns: repeat(3, 1fr);
+                                    }
+                                }
+
+                                @media (max-width: 768px) {
+                                    .stats-grid-6 {
+                                        grid-template-columns: repeat(2, 1fr);
+                                    }
+                                }
+                            </style>
+
+                            <!-- Quick Actions -->
+                            <div class="quick-actions">
+                                <a href="/authority/manage-issues?priority=Critical" class="btn btn-danger">
+                                    🚨 Critical Issues (<%= stats.critical %>)
+                                </a>
+                                <a href="/authority/manage-issues?priority=High" class="btn"
+                                    style="background: #ea580c; color: white;">
+                                    🔥 High Priority (<%= stats.high %>)
+                                </a>
+                                <a href="/authority/manage-issues" class="btn btn-primary">
+                                    📋 View All Issues
+                                </a>
+                                <a href="/authority/manage-issues?overdue=true" class="btn btn-danger">
+                                    ⚠️ View Overdue Issues
+                                </a>
+                            </div>
+
+                            <!-- Recent Assigned Issues -->
+                            <div class="section">
+                                <h2>Recent Assigned Issues (Priority Order)</h2>
+
+                                <% if (issues.length> 0) { %>
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Priority</th>
+                                                    <th>Issue ID</th>
+                                                    <th>Category</th>
+                                                    <th>Citizen</th>
+                                                    <th>Status</th>
+                                                    <th>SLA Deadline</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% issues.forEach(issue=> { %>
+                                                    <tr class="<%= issue.isOverdue ? 'row-overdue' : '' %>">
+                                                        <td>
+                                                            <% let priorityClass='priority-low' ; let priorityIcon='🔵'
+                                                                ; if (issue.priority==='Critical' ) {
+                                                                priorityClass='priority-critical' ; priorityIcon='🚨' ;
+                                                                } else if (issue.priority==='High' ) {
+                                                                priorityClass='priority-high' ; priorityIcon='🔥' ; }
+                                                                else if (issue.priority==='Medium' ) {
+                                                                priorityClass='priority-medium' ; priorityIcon='⚠️' ; }
+                                                                %>
+                                                                <span class="badge <%= priorityClass %>">
+                                                                    <%= priorityIcon %>
+                                                                        <%= issue.priority %>
+                                                                </span>
+                                                        </td>
+                                                        <td><strong>
+                                                                <%= issue.issueId %>
+                                                            </strong></td>
+                                                        <td><span class="badge badge-info">
+                                                                <%= issue.category %>
+                                                            </span></td>
+                                                        <td>
+                                                            <%= issue.citizen.name %>
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                class="badge badge-<%= issue.status.toLowerCase().replace(/ /g, '-') %>">
+                                                                <%= issue.status %>
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <% if (issue.isOverdue) { %>
+                                                                <span class="badge badge-danger">⚠️ Overdue</span>
+                                                                <% } else { %>
+                                                                    <%= new Date(issue.slaDeadline).toLocaleDateString()
+                                                                        %>
+                                                                        <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <a href="/authority/issue/<%= issue._id %>"
+                                                                class="btn btn-sm btn-primary">
+                                                                Manage
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    <% }) %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <% } else { %>
+                                        <div class="empty-state">
+                                            <p>📭 No issues assigned yet</p>
+                                        </div>
+                                        <% } %>
+                            </div>
+
+                            <%- include('../partials/footer') %>
+</body>
+
+</html>

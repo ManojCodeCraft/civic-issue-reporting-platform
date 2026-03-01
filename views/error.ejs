@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= title %>
+    </title>
+</head>
+
+<body>
+    <h1>
+        <%= message %>
+    </h1>
+
+    <% if (error && error.status) { %>
+        <p>Status Code: <%= error.status %>
+        </p>
+        <% } %>
+
+            <a href="/">Go Back Home</a>
+</body>
+
+</html>

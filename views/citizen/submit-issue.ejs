@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Voice Recording Styles */
+        .voice-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .voice-header {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 24px;
+        }
+
+        .voice-header h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .voice-header p {
+            opacity: 0.9;
+            font-size: 15px;
+        }
+
+        .language-selector {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .language-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .language-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .language-btn.active {
+            background: white;
+            color: #667eea;
+            border-color: white;
+        }
+
+        .voice-controls {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .record-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .record-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .record-btn.recording {
+            background: #ef4444;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .record-btn.processing {
+            background: #f59e0b;
+            pointer-events: none;
+        }
+
+        .voice-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .voice-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .voice-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .recording-status {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .recording-timer {
+            font-size: 24px;
+            font-family: monospace;
+            margin-top: 8px;
+        }
+
+        .transcription-result {
+            position: relative;
+            z-index: 1;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        .transcription-result.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .transcription-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .transcription-label {
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .confidence-badge {
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .transcription-text {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .suggested-category {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .use-transcription-btn {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 12px;
+        }
+
+        .use-transcription-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .wave-animation {
+            display: none;
+            justify-content: center;
+            gap: 4px;
+            margin-top: 16px;
+        }
+
+        .wave-animation.show {
+            display: flex;
+        }
+
+        .wave-bar {
+            width: 4px;
+            height: 20px;
+            background: white;
+            border-radius: 2px;
+            animation: wave 1s ease-in-out infinite;
+        }
+
+        .wave-bar:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .wave-bar:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .wave-bar:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .wave-bar:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes wave {
+
+            0%,
+            100% {
+                height: 20px;
+            }
+
+            50% {
+                height: 40px;
+            }
+        }
+
+        .ai-panel {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border-left: 4px solid #22c55e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .ai-panel h3 {
+            color: #166534;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-panel p {
+            color: #047857;
+            font-size: 14px;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container">
+            <div class="page-header">
+                <h1>📝 Submit New Issue</h1>
+                <p>Report a civic issue - Type or use voice recording</p>
+            </div>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <!-- Voice Recording Panel -->
+                    <div class="voice-panel">
+                        <div class="voice-header">
+                            <h2>
+                                <span>🎤</span>
+                                <span>Voice Recording (Multi-Language Support)</span>
+                            </h2>
+                            <p>Record your issue in ANY language - Our AI automatically detects Telugu, Tamil, Hindi,
+                                Kannada, Malayalam, and 50+ other languages!</p>
+
+                            <!-- Add Recording Tips -->
+                            <div
+                                style="background: rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 13px;">
+                                <strong>📌 Recording Tips:</strong>
+                                <ul style="margin: 8px 0 0 20px; padding: 0;">
+                                    <li>Speak clearly and loudly</li>
+                                    <li>Minimize background noise</li>
+                                    <li>Speak for at least 3-5 seconds</li>
+                                    <li>Use simple, clear sentences</li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+                        <!-- Language Selector -->
+                        <div class="language-selector" id="languageSelector">
+                            <button class="language-btn active" data-lang="auto">🌐 Auto-Detect</button>
+                            <button class="language-btn" data-lang="en">🇬🇧 English</button>
+                            <button class="language-btn" data-lang="hi">🇮🇳 हिंदी</button>
+                            <button class="language-btn" data-lang="te">🇮🇳 తెలుగు</button>
+                            <button class="language-btn" data-lang="ta">🇮🇳 தமிழ்</button>
+                            <button class="language-btn" data-lang="kn">🇮🇳 ಕನ್ನಡ</button>
+                            <button class="language-btn" data-lang="ml">🇮🇳 മലയാളം</button>
+                        </div>
+
+                        <!-- Recording Controls -->
+                        <div class="voice-controls">
+                            <button class="record-btn" id="recordBtn" title="Start Recording">
+                                🎙️
+                            </button>
+                            <button class="voice-btn" id="stopBtn" disabled>⏹️ Stop</button>
+                            <button class="voice-btn" id="playBtn" disabled>▶️ Play</button>
+                            <button class="voice-btn" id="clearBtn" disabled>🗑️ Clear</button>
+                        </div>
+
+                        <!-- Wave Animation -->
+                        <div class="wave-animation" id="waveAnimation">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
+
+                        <!-- Recording Status -->
+                        <div class="recording-status" id="recordingStatus"></div>
+
+                        <!-- Transcription Result -->
+                        <div class="transcription-result" id="transcriptionResult">
+                            <div class="transcription-header">
+                                <span class="transcription-label">AI Transcription</span>
+                                <span class="confidence-badge" id="languageBadge"></span>
+                            </div>
+                            <div class="transcription-text" id="transcriptionText"></div>
+                            <div>
+                                <span class="transcription-label" style="font-size: 12px;">SUGGESTED CATEGORY:</span>
+                                <span class="suggested-category" id="suggestedCategory"></span>
+                            </div>
+                            <button class="use-transcription-btn" onclick="useTranscription()">
+                                ✅ Use This Description
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Analysis Info -->
+                    <div class="ai-panel">
+                        <h3>
+                            <span>🤖</span>
+                            <span>AI-Powered Features Active</span>
+                        </h3>
+                        <p>Voice transcription, automatic categorization, and priority detection are enabled</p>
+                    </div>
+
+                    <!-- Regular Form -->
+                    <div class="form-container">
+                        <form action="/citizen/submit-issue" method="POST" enctype="multipart/form-data" id="issueForm">
+                            <div class="form-group">
+                                <label for="description">Description *</label>
+                                <textarea id="description" name="description" rows="5" required minlength="10"
+                                    maxlength="1000"
+                                    placeholder="Describe the issue in detail OR use voice recording above"
+                                    oninput="updateCharCount()"></textarea>
+                                <small>Character count: <span id="charCount">0</span>/1000</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="category">Issue Category *</label>
+                                <select id="category" name="category" required>
+                                    <option value="">Select Category (AI will suggest)</option>
+                                    <% Object.entries(categories).forEach(([key, value])=> { %>
+                                        <option value="<%= value %>">
+                                            <%= value %>
+                                        </option>
+                                        <% }) %>
+                                </select>
+                            </div>
+
+                            <!-- Hidden field for AI-detected priority -->
+                            <input type="hidden" id="aiPriority" name="priority" value="Medium">
+
+                            <div class="form-group">
+                                <label for="address">Location Address *</label>
+                                <input type="text" id="address" name="address" required
+                                    placeholder="Enter the exact location of the issue">
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="latitude">Latitude *</label>
+                                    <input type="number" id="latitude" name="latitude" step="any" required
+                                        placeholder="e.g., 15.8281">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="longitude">Longitude *</label>
+                                    <input type="number" id="longitude" name="longitude" step="any" required
+                                        placeholder="e.g., 78.0373">
+                                </div>
+                            </div>
+
+                            <button type="button" class="btn btn-secondary" onclick="getCurrentLocation()"
+                                style="margin-bottom: 16px;">
+                                📍 Use My Current Location
+                            </button>
+
+                            <div class="form-group">
+                                <label for="photo">Photo Evidence (Optional)</label>
+                                <input type="file" id="photo" name="photo" accept="image/*">
+                                <small>Max file size: 5MB. Accepted formats: JPG, PNG, GIF</small>
+                                <div id="imagePreview"></div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    🚀 Submit Issue
+                                </button>
+                                <a href="/citizen/dashboard" class="btn btn-secondary">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+        </div>
+
+        <%- include('../partials/footer') %>
+
+            <script>
+                // Voice Recording Variables
+                let mediaRecorder;
+                let audioChunks = [];
+                let audioBlob;
+                let audioUrl = null; // Store audio URL
+                let selectedLanguage = 'auto';
+                let recordingStartTime;
+                let recordingTimer;
+                let transcriptionData = null;
+
+                // Language Selection
+                document.querySelectorAll('.language-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        document.querySelectorAll('.language-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        selectedLanguage = this.dataset.lang;
+                        console.log('Selected language:', selectedLanguage);
+                    });
+                });
+
+                // Start Recording - FIXED
+                document.getElementById('recordBtn').addEventListener('click', async function () {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({
+                            audio: {
+                                channelCount: 1,
+                                sampleRate: 16000
+                            }
+                        });
+
+                        // Try to use audio/wav if supported, otherwise audio/webm
+                        let mimeType = 'audio/webm';
+                        if (MediaRecorder.isTypeSupported('audio/wav')) {
+                            mimeType = 'audio/wav';
+                        } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                            mimeType = 'audio/webm;codecs=opus';
+                        }
+
+                        console.log('Using MIME type:', mimeType);
+
+                        mediaRecorder = new MediaRecorder(stream, { mimeType });
+                        audioChunks = [];
+
+                        mediaRecorder.ondataavailable = (event) => {
+                            if (event.data.size > 0) {
+                                audioChunks.push(event.data);
+                            }
+                        };
+
+                        mediaRecorder.onstop = async () => {
+                            audioBlob = new Blob(audioChunks, { type: mimeType });
+                            console.log('Audio recorded:', audioBlob.size, 'bytes');
+
+                            if (audioUrl) URL.revokeObjectURL(audioUrl);
+                            audioUrl = URL.createObjectURL(audioBlob);
+
+                            document.getElementById('playBtn').disabled = false;
+                            document.getElementById('clearBtn').disabled = false;
+
+                            await processAudio();
+                        };
+
+                        mediaRecorder.start();
+                        this.classList.add('recording');
+                        this.textContent = '⏺️';
+                        document.getElementById('stopBtn').disabled = false;
+                        document.getElementById('waveAnimation').classList.add('show');
+
+                        recordingStartTime = Date.now();
+                        updateRecordingTimer();
+                        recordingTimer = setInterval(updateRecordingTimer, 100);
+
+                    } catch (error) {
+                        console.error('Microphone error:', error);
+                        alert('Could not access microphone: ' + error.message);
+                    }
+                });
+                // Stop Recording
+                document.getElementById('stopBtn').addEventListener('click', function () {
+                    if (mediaRecorder && mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+
+                        document.getElementById('recordBtn').classList.remove('recording');
+                        document.getElementById('recordBtn').textContent = '🎙️';
+                        this.disabled = true;
+                        document.getElementById('waveAnimation').classList.remove('show');
+
+                        clearInterval(recordingTimer);
+                        document.getElementById('recordingStatus').innerHTML = '<span style="color: #22c55e;">✅ Recording complete! Processing...</span>';
+                    }
+                });
+
+                // Play Recording - FIXED VERSION
+                document.getElementById('playBtn').addEventListener('click', function () {
+                    if (audioUrl) {
+                        console.log('Playing audio from URL:', audioUrl);
+                        const audio = new Audio(audioUrl);
+
+                        audio.onplay = () => {
+                            console.log('Audio playback started');
+                            this.textContent = '⏸️ Pause';
+                        };
+
+                        audio.onended = () => {
+                            console.log('Audio playback ended');
+                            this.textContent = '▶️ Play';
+                        };
+
+                        audio.onerror = (e) => {
+                            console.error('Audio playback error:', e);
+                            alert('Failed to play audio');
+                        };
+
+                        audio.play().catch(err => {
+                            console.error('Play error:', err);
+                            alert('Could not play audio: ' + err.message);
+                        });
+                    } else {
+                        console.error('No audio URL available');
+                        alert('No audio available to play');
+                    }
+                });
+
+                // Clear Recording
+                document.getElementById('clearBtn').addEventListener('click', function () {
+                    audioChunks = [];
+                    audioBlob = null;
+                    transcriptionData = null;
+
+                    if (audioUrl) {
+                        URL.revokeObjectURL(audioUrl);
+                        audioUrl = null;
+                    }
+
+                    document.getElementById('playBtn').disabled = true;
+                    document.getElementById('clearBtn').disabled = true;
+                    document.getElementById('recordingStatus').innerHTML = '';
+                    document.getElementById('transcriptionResult').classList.remove('show');
+                    document.getElementById('recordBtn').classList.remove('processing');
+                });
+
+                // Update Recording Timer
+                function updateRecordingTimer() {
+                    const elapsed = Date.now() - recordingStartTime;
+                    const seconds = Math.floor(elapsed / 1000);
+                    const minutes = Math.floor(seconds / 60);
+                    const remainingSeconds = seconds % 60;
+
+                    document.getElementById('recordingStatus').innerHTML = `
+      <span>🔴 Recording...</span>
+      <div class="recording-timer">${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}</div>
+    `;
+                }
+
+                // Process Audio - SIMPLIFIED
+                async function processAudio() {
+                    if (!audioBlob) return;
+
+                    document.getElementById('recordBtn').classList.add('processing');
+                    document.getElementById('recordingStatus').innerHTML = '<span>🤖 Processing...</span>';
+
+                    try {
+                        // Convert to array buffer
+                        const arrayBuffer = await audioBlob.arrayBuffer();
+                        const base64Audio = btoa(
+                            new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+                        );
+
+                        console.log('Sending audio, size:', Math.round(base64Audio.length * 0.75 / 1024), 'KB');
+
+                        const response = await fetch('/api/voice/process-issue', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ audio: base64Audio })
+                        });
+
+                        const data = await response.json();
+                        console.log('Response:', data);
+
+                        if (data.success) {
+                            transcriptionData = data;
+                            displayTranscription(data);
+                            document.getElementById('recordingStatus').innerHTML = '<span style="color: #22c55e;">✅ Done!</span>';
+                        } else {
+                            document.getElementById('recordingStatus').innerHTML = '<span style="color: #ef4444;">❌ ' + (data.error || 'Failed') + '</span>';
+                            document.getElementById('transcriptionText').textContent = data.error || 'Failed to process';
+                            document.getElementById('transcriptionResult').classList.add('show');
+                        }
+
+                        document.getElementById('recordBtn').classList.remove('processing');
+                    } catch (error) {
+                        console.error('Error:', error);
+                        document.getElementById('recordingStatus').innerHTML = '<span style="color: #ef4444;">❌ Error: ' + error.message + '</span>';
+                        document.getElementById('recordBtn').classList.remove('processing');
+                    }
+                }
+                // Display Transcription - ENHANCED
+                function displayTranscription(data) {
+                    if (!data.cleanedDescription || data.cleanedDescription.trim().length === 0) {
+                        document.getElementById('transcriptionText').textContent = "No speech detected. Please speak clearly and try again.";
+                        document.getElementById('suggestedCategory').textContent = "N/A";
+                        document.getElementById('languageBadge').textContent = "Language: UNKNOWN";
+                        document.getElementById('transcriptionResult').classList.add('show');
+                        return;
+                    }
+
+                    // Show the transcription
+                    document.getElementById('transcriptionText').textContent = data.cleanedDescription;
+                    document.getElementById('suggestedCategory').textContent = data.suggestedCategory || 'Other';
+
+                    // Detect script to show appropriate language badge
+                    let detectedScript = "English";
+                    const text = data.cleanedDescription;
+
+                    if (/[\u0C00-\u0C7F]/.test(text)) detectedScript = "Telugu";
+                    else if (/[\u0B80-\u0BFF]/.test(text)) detectedScript = "Tamil";
+                    else if (/[\u0900-\u097F]/.test(text)) detectedScript = "Hindi";
+                    else if (/[\u0C80-\u0CFF]/.test(text)) detectedScript = "Kannada";
+                    else if (/[\u0D00-\u0D7F]/.test(text)) detectedScript = "Malayalam";
+
+                    document.getElementById('languageBadge').textContent = `Language: ${detectedScript}`;
+                    document.getElementById('transcriptionResult').classList.add('show');
+                }
+
+                // Use Transcription in Form
+                function useTranscription() {
+                    if (transcriptionData && transcriptionData.cleanedDescription) {
+                        document.getElementById('description').value = transcriptionData.cleanedDescription;
+                        document.getElementById('category').value = transcriptionData.suggestedCategory || 'Other';
+                        updateCharCount();
+
+                        // Scroll to form
+                        document.getElementById('description').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                        // Highlight the filled fields
+                        document.getElementById('description').style.background = '#dcfce7';
+                        document.getElementById('category').style.background = '#dcfce7';
+
+                        setTimeout(() => {
+                            document.getElementById('description').style.background = '';
+                            document.getElementById('category').style.background = '';
+                        }, 2000);
+                    }
+                }
+
+                // Character counter
+                function updateCharCount() {
+                    const description = document.getElementById('description');
+                    const charCount = document.getElementById('charCount');
+                    charCount.textContent = description.value.length;
+                }
+
+                // Get current location
+                function getCurrentLocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            function (position) {
+                                document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+                                document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+                                console.log('Location captured:', position.coords.latitude, position.coords.longitude);
+                            },
+                            function (error) {
+                                console.error('Location error:', error);
+                            }
+                        );
+                    }
+                }
+
+                // Image preview
+                document.getElementById('photo').addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    const preview = document.getElementById('imagePreview');
+
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            preview.innerHTML = `
+          <img src="${e.target.result}" style="max-width: 200px; margin-top: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        `;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                // Form submission
+                document.getElementById('issueForm').addEventListener('submit', function (e) {
+                    const submitBtn = document.getElementById('submitBtn');
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '⏳ Submitting...';
+                });
+
+                // Auto-get location on page load
+                window.addEventListener('load', function () {
+                    getCurrentLocation();
+                });
+
+                // Cleanup on page unload
+                window.addEventListener('beforeunload', function () {
+                    if (audioUrl) {
+                        URL.revokeObjectURL(audioUrl);
+                    }
+                });
+            </script>
+</body>
+
+</html>

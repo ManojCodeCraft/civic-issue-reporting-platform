@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #map {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            max-width: 300px;
+        }
+
+        .map-controls h3 {
+            margin: 0 0 16px 0;
+            font-size: 18px;
+            color: #1f2937;
+        }
+
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .map-legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .map-legend h4 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-panel {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            z-index: 1000;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            min-width: 200px;
+        }
+
+        .stat-item {
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .btn-map {
+            width: 100%;
+            padding: 10px;
+            background: #1e6db5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        .btn-map:hover {
+            background: #0f4c81;
+            transform: translateY(-2px);
+        }
+
+        .btn-map.secondary {
+            background: #6b7280;
+        }
+
+        .btn-map.secondary:hover {
+            background: #4b5563;
+        }
+
+        /* Custom marker styles */
+        .custom-marker {
+            background: none;
+            border: none;
+        }
+
+        .marker-pin {
+            width: 30px;
+            height: 30px;
+            border-radius: 50% 50% 50% 0;
+            position: absolute;
+            transform: rotate(-45deg);
+            left: 50%;
+            top: 50%;
+            margin: -15px 0 0 -15px;
+        }
+
+        .marker-pin::after {
+            content: '';
+            width: 14px;
+            height: 14px;
+            margin: 8px 0 0 8px;
+            background: #fff;
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .pulse {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            height: 14px;
+            width: 14px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin: 11px 0 0 -12px;
+            transform: rotateX(55deg);
+            z-index: -2;
+        }
+
+        .pulse::after {
+            content: '';
+            border-radius: 50%;
+            height: 40px;
+            width: 40px;
+            position: absolute;
+            margin: -13px 0 0 -13px;
+            animation: pulsate 1s ease-out infinite;
+            opacity: 0;
+            box-shadow: 0 0 1px 2px #ef4444;
+            animation-delay: 1.1s;
+        }
+
+        @keyframes pulsate {
+            0% {
+                transform: scale(0.1);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e6db5;
+        }
+
+        .loading-overlay.hidden {
+            display: none;
+        }
+
+        /* Popup styles */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .popup-content {
+            padding: 8px;
+            min-width: 250px;
+        }
+
+        .popup-header {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1f2937;
+        }
+
+        .popup-detail {
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .popup-detail strong {
+            color: #374151;
+        }
+
+        .popup-actions {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .popup-btn {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #1e6db5;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+            transition: all 0.3s;
+        }
+
+        .popup-btn:hover {
+            background: #0f4c81;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div>🗺️ Loading Map Data...</div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map"></div>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <h3 style="margin: 0 0 16px 0; font-size: 16px;">📊 Live Statistics</h3>
+            <div class="stat-item">
+                <div class="stat-label">Total Issues</div>
+                <div class="stat-value" id="totalIssues">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">On Map</div>
+                <div class="stat-value" id="mapIssues">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Overdue</div>
+                <div class="stat-value" style="color: #ef4444;" id="overdueIssues">0</div>
+            </div>
+        </div>
+
+        <!-- Map Controls -->
+        <div class="map-controls">
+            <h3>🎛️ Map Filters</h3>
+
+            <div class="control-group">
+                <label>Status</label>
+                <select id="statusFilter">
+                    <option value="">All Statuses</option>
+                    <option value="Reported">Reported</option>
+                    <option value="Verified">Verified</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Category</label>
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                    <option value="Road Damage">Road Damage</option>
+                    <option value="Waste Management">Waste Management</option>
+                    <option value="Water Supply">Water Supply</option>
+                    <option value="Street Lighting">Street Lighting</option>
+                    <option value="Drainage">Drainage</option>
+                    <option value="Parks & Gardens">Parks & Gardens</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="overdueFilter" style="width: auto; margin-right: 6px;">
+                    Show Only Overdue
+                </label>
+            </div>
+
+            <button class="btn-map" onclick="applyFilters()">Apply Filters</button>
+            <button class="btn-map secondary" onclick="resetFilters()">Reset</button>
+
+            <hr style="margin: 16px 0; border: none; border-top: 1px solid #e5e7eb;">
+
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="heatmapToggle" style="width: auto; margin-right: 6px;">
+                    Show Heat Map
+                </label>
+            </div>
+
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="clusterToggle" checked style="width: auto; margin-right: 6px;">
+                    Enable Clustering
+                </label>
+            </div>
+
+            <button class="btn-map" onclick="refreshMap()">🔄 Refresh Data</button>
+        </div>
+
+        <!-- Legend -->
+        <div class="map-legend">
+            <h4>Issue Status</h4>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ef4444;"></div>
+                <span>Overdue / Critical</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f59e0b;"></div>
+                <span>Reported / Verified</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #3b82f6;"></div>
+                <span>In Progress</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #22c55e;"></div>
+                <span>Resolved</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #6b7280;"></div>
+                <span>Closed</span>
+            </div>
+        </div>
+
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+        <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+        <script>
+            // Initialize map
+            let map;
+            let markersLayer;
+            let heatmapLayer;
+            let allIssues = [];
+
+            // Default center (Kurnool, Andhra Pradesh)
+            const defaultCenter = [15.8281, 78.0373];
+
+            function initMap() {
+                // Create map
+                map = L.map('map').setView(defaultCenter, 13);
+
+                // Add tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Initialize marker cluster group
+                markersLayer = L.markerClusterGroup({
+                    chunkedLoading: true,
+                    spiderfyOnMaxZoom: true,
+                    showCoverageOnHover: false,
+                    zoomToBoundsOnClick: true
+                });
+
+                // Add click event to map for future feature (click to report)
+                map.on('click', function (e) {
+                    console.log('Clicked at:', e.latlng);
+                    // Future: Add "Report issue at this location" functionality
+                });
+
+                // Load issues
+                loadIssues();
+            }
+
+            async function loadIssues() {
+                try {
+                    document.getElementById('loadingOverlay').classList.remove('hidden');
+
+                    const response = await fetch('/map/api/issues');
+                    const data = await response.json();
+
+                    if (data.success) {
+                        allIssues = data.issues;
+                        displayIssues(allIssues);
+                        updateStats(allIssues);
+                    }
+
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                } catch (error) {
+                    console.error('Error loading issues:', error);
+                    alert('Failed to load map data');
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                }
+            }
+
+            function displayIssues(issues) {
+                // Clear existing markers
+                markersLayer.clearLayers();
+
+                // Check if clustering is enabled
+                const clusterEnabled = document.getElementById('clusterToggle').checked;
+
+                issues.forEach(issue => {
+                    const color = getMarkerColor(issue);
+
+                    // Create custom icon
+                    const icon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `
+            <div class="marker-pin" style="background-color: ${color};"></div>
+            ${issue.isOverdue ? '<div class="pulse"></div>' : ''}
+          `,
+                        iconSize: [30, 42],
+                        iconAnchor: [15, 42],
+                        popupAnchor: [0, -42]
+                    });
+
+                    // Create marker
+                    const marker = L.marker([issue.latitude, issue.longitude], { icon: icon });
+
+                    // Create popup content
+                    const popupContent = createPopupContent(issue);
+                    marker.bindPopup(popupContent);
+
+                    // Add to appropriate layer
+                    if (clusterEnabled) {
+                        markersLayer.addLayer(marker);
+                    } else {
+                        marker.addTo(map);
+                    }
+                });
+
+                // Add cluster layer to map if enabled
+                if (clusterEnabled) {
+                    map.addLayer(markersLayer);
+                }
+
+                // Fit bounds if issues exist
+                if (issues.length > 0) {
+                    const bounds = L.latLngBounds(issues.map(i => [i.latitude, i.longitude]));
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                }
+            }
+
+            function getMarkerColor(issue) {
+                if (issue.isOverdue) return '#ef4444'; // Red
+
+                switch (issue.status) {
+                    case 'Reported':
+                    case 'Verified':
+                        return '#f59e0b'; // Orange
+                    case 'In Progress':
+                        return '#3b82f6'; // Blue
+                    case 'Resolved':
+                        return '#22c55e'; // Green
+                    case 'Closed':
+                        return '#6b7280'; // Gray
+                    default:
+                        return '#f59e0b';
+                }
+            }
+
+            function createPopupContent(issue) {
+                const statusBadge = `<span style="background: ${getMarkerColor(issue)}; color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">${issue.status}</span>`;
+
+                return `
+        <div class="popup-content">
+          <div class="popup-header">
+            ${issue.issueId}
+            ${issue.isOverdue ? '⚠️' : ''}
+          </div>
+          <div class="popup-detail">
+            <strong>Category:</strong> ${issue.category}
+          </div>
+          <div class="popup-detail">
+            <strong>Status:</strong> ${statusBadge}
+          </div>
+          <div class="popup-detail">
+            <strong>Priority:</strong> ${issue.priority}
+          </div>
+          <div class="popup-detail">
+            <strong>Location:</strong><br>${issue.address}
+          </div>
+          <div class="popup-detail">
+            <strong>Reported by:</strong> ${issue.citizen}
+          </div>
+          <div class="popup-detail">
+            <strong>Assigned to:</strong> ${issue.assignedTo}
+          </div>
+          <div class="popup-actions">
+            <a href="/citizen/issue/${issue.id}" class="popup-btn">View Details</a>
+          </div>
+        </div>
+      `;
+            }
+
+            async function toggleHeatmap() {
+                const isChecked = document.getElementById('heatmapToggle').checked;
+
+                if (isChecked) {
+                    if (!heatmapLayer) {
+                        try {
+                            const response = await fetch('/map/api/heatmap');
+                            const data = await response.json();
+
+                            if (data.success) {
+                                heatmapLayer = L.heatLayer(data.heatmap, {
+                                    radius: 25,
+                                    blur: 15,
+                                    maxZoom: 17,
+                                    max: 1.0,
+                                    gradient: {
+                                        0.0: 'green',
+                                        0.5: 'yellow',
+                                        0.7: 'orange',
+                                        1.0: 'red'
+                                    }
+                                }).addTo(map);
+                            }
+                        } catch (error) {
+                            console.error('Error loading heatmap:', error);
+                        }
+                    } else {
+                        map.addLayer(heatmapLayer);
+                    }
+                } else {
+                    if (heatmapLayer) {
+                        map.removeLayer(heatmapLayer);
+                    }
+                }
+            }
+
+            function applyFilters() {
+                const status = document.getElementById('statusFilter').value;
+                const category = document.getElementById('categoryFilter').value;
+                const overdueOnly = document.getElementById('overdueFilter').checked;
+
+                let filtered = allIssues;
+
+                if (status) {
+                    filtered = filtered.filter(i => i.status === status);
+                }
+
+                if (category) {
+                    filtered = filtered.filter(i => i.category === category);
+                }
+
+                if (overdueOnly) {
+                    filtered = filtered.filter(i => i.isOverdue);
+                }
+
+                displayIssues(filtered);
+                updateStats(filtered);
+            }
+
+            function resetFilters() {
+                document.getElementById('statusFilter').value = '';
+                document.getElementById('categoryFilter').value = '';
+                document.getElementById('overdueFilter').checked = false;
+
+                displayIssues(allIssues);
+                updateStats(allIssues);
+            }
+
+            function updateStats(issues) {
+                document.getElementById('totalIssues').textContent = allIssues.length;
+                document.getElementById('mapIssues').textContent = issues.length;
+                document.getElementById('overdueIssues').textContent = issues.filter(i => i.isOverdue).length;
+            }
+
+            function refreshMap() {
+                loadIssues();
+            }
+
+            // Event listeners
+            document.getElementById('heatmapToggle').addEventListener('change', toggleHeatmap);
+            document.getElementById('clusterToggle').addEventListener('change', () => {
+                displayIssues(allIssues);
+            });
+
+            // Initialize map on page load
+            window.addEventListener('load', initMap);
+        </script>
+</body>
+
+</html>

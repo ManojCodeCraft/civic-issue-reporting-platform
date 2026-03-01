@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container">
+            <div class="page-header">
+                <h1>🔍 Issue Details (Admin View)</h1>
+                <a href="/admin/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (success && success.length> 0) { %>
+                        <div class="alert alert-success">
+                            <%= success %>
+                        </div>
+                        <% } %>
+
+                            <div class="detail-container">
+                                <!-- Issue Details -->
+                                <div class="detail-card">
+                                    <div class="detail-header">
+                                        <h2>
+                                            <%= issue.issueId %>
+                                        </h2>
+                                        <span class="badge badge-<%= issue.status.toLowerCase().replace(/ /g, '-') %>">
+                                            <%= issue.status %>
+                                        </span>
+                                    </div>
+
+                                    <div class="detail-grid">
+                                        <div class="detail-item">
+                                            <strong>Category:</strong>
+                                            <span class="badge badge-info">
+                                                <%= issue.category %>
+                                            </span>
+                                        </div>
+
+                                        <div class="detail-item">
+                                            <strong>Citizen:</strong>
+                                            <%= issue.citizen.name %><br>
+                                                <small>
+                                                    <%= issue.citizen.email %> | <%= issue.citizen.phone %>
+                                                </small>
+                                        </div>
+
+                                        <div class="detail-item">
+                                            <strong>Submitted:</strong>
+                                            <%= new Date(issue.createdAt).toLocaleString() %>
+                                        </div>
+
+                                        <div class="detail-item">
+                                            <strong>SLA Deadline:</strong>
+                                            <% if (issue.isOverdue) { %>
+                                                <span class="badge badge-danger">⚠️ Overdue</span>
+                                                <% } else { %>
+                                                    <%= new Date(issue.slaDeadline).toLocaleString() %>
+                                                        <% } %>
+                                        </div>
+                                    </div>
+
+                                    <div class="detail-section">
+                                        <h3>Description</h3>
+                                        <p>
+                                            <%= issue.description %>
+                                        </p>
+                                    </div>
+
+                                    <div class="detail-section">
+                                        <h3>Location</h3>
+                                        <p>📍 <%= issue.location.address %>
+                                        </p>
+                                        <% if (issue.location.coordinates.latitude &&
+                                            issue.location.coordinates.longitude) { %>
+                                            <p><small>Coordinates: <%= issue.location.coordinates.latitude %>, <%=
+                                                            issue.location.coordinates.longitude %></small></p>
+                                            <% } %>
+                                    </div>
+
+                                    <% if (issue.photo) { %>
+                                        <div class="detail-section">
+                                            <h3>Photo Evidence</h3>
+                                            <img src="<%= issue.photo %>" alt="Issue Photo" class="issue-photo">
+                                        </div>
+                                        <% } %>
+
+                                            <!-- Assignment Section -->
+                                            <div class="detail-section">
+                                                <h3>Assignment Management</h3>
+                                                <% if (issue.assignedTo) { %>
+                                                    <div
+                                                        style="padding: 16px; background: #f0fdf4; border-left: 4px solid #22c55e; border-radius: 8px; margin-bottom: 16px;">
+                                                        <p><strong>Currently Assigned To:</strong></p>
+                                                        <p>
+                                                            <%= issue.assignedTo.name %> (<%=
+                                                                    issue.assignedTo.department %>)
+                                                        </p>
+                                                        <p><small>
+                                                                <%= issue.assignedTo.email %>
+                                                            </small></p>
+                                                    </div>
+                                                    <form action="/admin/assign-issue/<%= issue._id %>" method="POST">
+                                                        <div class="form-group">
+                                                            <label>Reassign to Different Authority</label>
+                                                            <select name="authorityId" required>
+                                                                <option value="">Select Authority...</option>
+                                                                <% authorities.forEach(authority=> { %>
+                                                                    <option value="<%= authority._id %>"
+                                                                        <%=issue.assignedTo._id.equals(authority._id)
+                                                                        ? 'selected' : '' %>>
+                                                                        <%= authority.name %> - <%= authority.department
+                                                                                %>
+                                                                    </option>
+                                                                    <% }) %>
+                                                            </select>
+                                                        </div>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            🔄 Reassign Issue
+                                                        </button>
+                                                    </form>
+                                                    <% } else { %>
+                                                        <div
+                                                            style="padding: 16px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; margin-bottom: 16px;">
+                                                            <p><strong>⚠️ This issue has not been assigned yet</strong>
+                                                            </p>
+                                                        </div>
+                                                        <form action="/admin/assign-issue/<%= issue._id %>"
+                                                            method="POST">
+                                                            <div class="form-group">
+                                                                <label>Assign to Authority *</label>
+                                                                <select name="authorityId" required>
+                                                                    <option value="">Select Authority...</option>
+                                                                    <% authorities.forEach(authority=> { %>
+                                                                        <option value="<%= authority._id %>">
+                                                                            <%= authority.name %> - <%=
+                                                                                    authority.department %>
+                                                                        </option>
+                                                                        <% }) %>
+                                                                </select>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary">
+                                                                ✅ Assign Issue
+                                                            </button>
+                                                        </form>
+                                                        <% } %>
+                                            </div>
+                                </div>
+
+                                <!-- Timeline -->
+                                <div class="timeline-card">
+                                    <h3>📅 Issue Timeline</h3>
+                                    <div class="timeline">
+                                        <% issue.timeline.forEach(entry=> { %>
+                                            <div class="timeline-item">
+                                                <div class="timeline-marker"></div>
+                                                <div class="timeline-content">
+                                                    <h4>
+                                                        <%= entry.status %>
+                                                    </h4>
+                                                    <p>
+                                                        <%= entry.remarks %>
+                                                    </p>
+                                                    <% if (entry.evidence) { %>
+                                                        <img src="<%= entry.evidence %>" alt="Evidence"
+                                                            class="timeline-evidence">
+                                                        <% } %>
+                                                            <small>
+                                                                By <%= entry.updatedBy.name %> (<%= entry.updatedBy.role
+                                                                        %>)
+                                                                        on <%= new
+                                                                            Date(entry.timestamp).toLocaleString() %>
+                                                            </small>
+                                                </div>
+                                            </div>
+                                            <% }) %>
+                                    </div>
+                                </div>
+                            </div>
+        </div>
+
+        <%- include('../partials/footer') %>
+</body>
+
+</html>

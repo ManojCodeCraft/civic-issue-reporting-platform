@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .priority-critical {
+            background: #fee2e2;
+            color: #991b1b;
+            font-weight: 700;
+        }
+
+        .priority-high {
+            background: #fed7aa;
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container">
+            <div class="page-header">
+                <h1>📋 My Issues</h1>
+                <p>Track all your submitted issues</p>
+            </div>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (success && success.length> 0) { %>
+                        <div class="alert alert-success">
+                            <%= success %>
+                        </div>
+                        <% } %>
+
+                            <!-- Filters -->
+                            <div class="filters-section">
+                                <form method="GET" action="/citizen/view-issues" class="filters-form">
+                                    <div class="filter-group">
+                                        <label for="status">Status</label>
+                                        <select id="status" name="status" onchange="this.form.submit()">
+                                            <option value="">All Statuses</option>
+                                            <% Object.values(statuses).forEach(status=> { %>
+                                                <option value="<%= status %>" <%=currentFilter.status===status
+                                                    ? 'selected' : '' %>>
+                                                    <%= status %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <label for="category">Category</label>
+                                        <select id="category" name="category" onchange="this.form.submit()">
+                                            <option value="">All Categories</option>
+                                            <% Object.values(categories).forEach(category=> { %>
+                                                <option value="<%= category %>" <%=currentFilter.category===category
+                                                    ? 'selected' : '' %>>
+                                                    <%= category %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="window.location.href='/citizen/view-issues'">
+                                        Clear Filters
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Issues List -->
+                            <% if (issues.length> 0) { %>
+                                <div class="issues-grid">
+                                    <% issues.forEach(issue=> { %>
+                                        <div class="issue-card <%= issue.isOverdue ? 'overdue' : '' %>">
+                                            <div class="issue-header">
+                                                <h3>
+                                                    <%= issue.issueId %>
+                                                </h3>
+                                                <div style="display: flex; gap: 8px; align-items: center;">
+                                                    <% let priorityClass='priority-low' ; let priorityIcon='🔵' ; if
+                                                        (issue.priority==='Critical' ) {
+                                                        priorityClass='priority-critical' ; priorityIcon='🚨' ; } else
+                                                        if (issue.priority==='High' ) { priorityClass='priority-high' ;
+                                                        priorityIcon='🔥' ; } else if (issue.priority==='Medium' ) {
+                                                        priorityClass='priority-medium' ; priorityIcon='⚠️' ; } %>
+                                                        <span class="badge <%= priorityClass %>"
+                                                            style="font-size: 11px;">
+                                                            <%= priorityIcon %>
+                                                                <%= issue.priority %>
+                                                        </span>
+                                                        <span
+                                                            class="badge badge-<%= issue.status.toLowerCase().replace(/ /g, '-') %>">
+                                                            <%= issue.status %>
+                                                        </span>
+                                                </div>
+                                            </div>
+
+                                            <div class="issue-content">
+                                                <p class="issue-category">
+                                                    <strong>Category:</strong>
+                                                    <%= issue.category %>
+                                                </p>
+                                                <p class="issue-description">
+                                                    <%= issue.description.substring(0, 120) %>
+                                                        <%= issue.description.length> 120 ? '...' : '' %>
+                                                </p>
+                                                <p class="issue-location">
+                                                    📍 <%= issue.location.address %>
+                                                </p>
+                                            </div>
+
+                                            <div class="issue-footer">
+                                                <div class="issue-meta">
+                                                    <span>📅 <%= new Date(issue.createdAt).toLocaleDateString() %>
+                                                    </span>
+                                                    <% if (issue.isOverdue) { %>
+                                                        <span class="overdue-badge">⚠️ Overdue</span>
+                                                        <% } %>
+                                                </div>
+                                                <a href="/citizen/issue/<%= issue._id %>"
+                                                    class="btn btn-sm btn-primary">
+                                                    View Details
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <% }) %>
+                                </div>
+                                <% } else { %>
+                                    <div class="empty-state">
+                                        <p>📭 No issues found</p>
+                                        <a href="/citizen/submit-issue" class="btn btn-primary">Submit New Issue</a>
+                                    </div>
+                                    <% } %>
+
+
+
+                                        <%- include('../partials/footer') %>
+</body>
+
+</html>

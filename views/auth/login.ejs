@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🏛️ CivicTrack</h1>
+                <p>Municipal Governance Platform</p>
+            </div>
+
+            <h2>Login to Your Account</h2>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (success && success.length> 0) { %>
+                        <div class="alert alert-success">
+                            <%= success %>
+                        </div>
+                        <% } %>
+
+                            <form action="/auth/login" method="POST" class="auth-form">
+                                <div class="form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" id="password" name="password" required
+                                        placeholder="Enter your password">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    🔐 Login
+                                </button>
+                            </form>
+
+                            <div class="auth-footer">
+                                <p>Don't have an account? <a href="/auth/register">Register here</a></p>
+                                <p><a href="/">← Back to Home</a></p>
+                            </div>
+        </div>
+    </div>
+</body>
+
+</html>

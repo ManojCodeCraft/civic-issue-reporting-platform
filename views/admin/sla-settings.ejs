@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container">
+            <div class="page-header">
+                <h1>⏱️ SLA Settings</h1>
+                <p>Configure Service Level Agreement deadlines for each issue category</p>
+            </div>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (success && success.length> 0) { %>
+                        <div class="alert alert-success">
+                            <%= success %>
+                        </div>
+                        <% } %>
+
+                            <div class="sla-settings-grid">
+                                <% slaData.forEach(sla=> { %>
+                                    <div class="sla-setting-card">
+                                        <h3>
+                                            <%= sla.category %>
+                                        </h3>
+                                        <form action="/admin/update-sla" method="POST">
+                                            <input type="hidden" name="category" value="<%= sla.category %>">
+
+                                            <div class="form-group">
+                                                <label>Resolution Time (Days)</label>
+                                                <input type="number" name="durationInDays"
+                                                    value="<%= sla.durationInDays %>" min="1" max="365" required>
+                                            </div>
+
+                                            <% if (sla.updatedBy) { %>
+                                                <small class="text-muted">
+                                                    Last updated by <%= sla.updatedBy.name %>
+                                                </small>
+                                                <% } %>
+
+                                                    <button type="submit" class="btn btn-primary btn-block">
+                                                        💾 Update SLA
+                                                    </button>
+                                        </form>
+                                    </div>
+                                    <% }) %>
+                            </div>
+
+                            <div class="info-box">
+                                <h3>ℹ️ About SLA Settings</h3>
+                                <p>Service Level Agreements (SLA) define the maximum time allowed to resolve each type
+                                    of issue.
+                                    Issues that exceed their SLA deadline are automatically flagged as overdue.</p>
+                                <ul>
+                                    <li>Set realistic timelines based on your municipality's capacity</li>
+                                    <li>Consider the urgency and complexity of each issue type</li>
+                                    <li>Changes apply to new issues immediately</li>
+                                    <li>Existing issues retain their original SLA deadline</li>
+                                </ul>
+                            </div>
+        </div>
+
+        <%- include('../partials/footer') %>
+</body>
+
+</html>

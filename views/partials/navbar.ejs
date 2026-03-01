@@ -1,0 +1,57 @@
+<nav class="navbar">
+    <div class="navbar-container">
+        <a href="/" class="navbar-brand">
+            🏛️ <span>CivicTrack</span>
+        </a>
+
+        <div class="navbar-menu">
+            <% if (user) { %>
+                <% if (user.role==='citizen' ) { %>
+                    <a href="/citizen/dashboard" class="nav-link">Dashboard</a>
+                    <a href="/citizen/submit-issue" class="nav-link">Submit Issue</a>
+                    <a href="/citizen/view-issues" class="nav-link">My Issues</a>
+                    <a href="/map" class="nav-link">🗺️ Map</a>
+                    <% } else if (user.role==='authority' ) { %>
+                        <a href="/authority/dashboard" class="nav-link">Dashboard</a>
+                        <a href="/authority/manage-issues" class="nav-link">Manage Issues</a>
+                        <a href="/map" class="nav-link">🗺️ Map</a>
+                        <% } else if (user.role==='admin' ) { %>
+                            <a href="/admin/dashboard" class="nav-link">Dashboard</a>
+                            <a href="/admin/manage-users" class="nav-link">Users</a>
+                            <a href="/admin/sla-settings" class="nav-link">SLA Settings</a>
+                            <a href="/map" class="nav-link">🗺️ Map</a>
+                            <% } %>
+
+                                <a href="/dashboard" class="nav-link">Public Dashboard</a>
+
+                                <!-- Notification Bell -->
+                                <div class="notification-bell">
+                                    🔔
+                                    <span class="notification-badge" id="notificationBadge">0</span>
+                                </div>
+
+                                <div class="nav-user">
+                                    <span class="user-name">👤 <%= user.name %></span>
+                                    <a href="/auth/logout" class="btn btn-logout">Logout</a>
+                                </div>
+
+                                <!-- Hidden user data for Socket.io -->
+                                <div id="userData" data-user-id="<%= user._id %>" data-role="<%= user.role %>"
+                                    style="display: none;">
+                                </div>
+                                <% } else { %>
+                                    <a href="/" class="nav-link">Home</a>
+                                    <a href="/map" class="nav-link">🗺️ Map</a>
+                                    <a href="/dashboard" class="nav-link">Public Dashboard</a>
+                                    <a href="/auth/login" class="btn btn-primary">Login</a>
+                                    <a href="/auth/register" class="btn btn-secondary">Register</a>
+                                    <% } %>
+        </div>
+    </div>
+</nav>
+
+<% if (user) { %>
+    <!-- Load Socket.io and Notifications -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/notifications.js"></script>
+    <% } %>

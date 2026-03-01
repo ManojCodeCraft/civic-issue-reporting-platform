@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="public-dashboard">
+        <!-- Public Header -->
+        <div class="public-header">
+            <div class="container">
+                <h1>🏛️ CivicTrack - Public Dashboard</h1>
+                <p>Transparent Municipal Governance Metrics</p>
+                <a href="/" class="btn btn-secondary">← Back to Home</a>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Overall Stats -->
+            <div class="stats-grid stats-grid-5">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <h3>
+                            <%= stats.totalIssues %>
+                        </h3>
+                        <p>Total Issues</p>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-success">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3>
+                            <%= stats.resolvedIssues %>
+                        </h3>
+                        <p>Resolved</p>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-warning">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <h3>
+                            <%= stats.pendingIssues %>
+                        </h3>
+                        <p>Pending</p>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-danger">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-content">
+                        <h3>
+                            <%= stats.overdueIssues %>
+                        </h3>
+                        <p>Overdue</p>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-info">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-content">
+                        <h3>
+                            <%= stats.resolutionRate %>%
+                        </h3>
+                        <p>Resolution Rate</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resolution Time -->
+            <div class="metric-card">
+                <h2>⏱️ Average Resolution Time</h2>
+                <div class="metric-value">
+                    <h1>
+                        <%= stats.avgResolutionTime %>
+                    </h1>
+                    <p>hours</p>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>📊 Issues by Category</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <h3>📈 Status Distribution</h3>
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Category Breakdown Table -->
+            <div class="section">
+                <h2>📋 Category-wise Breakdown</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total</th>
+                                <th>Resolved</th>
+                                <th>Pending</th>
+                                <th>Resolution Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% categoryStats.forEach(cat=> { %>
+                                <tr>
+                                    <td><strong>
+                                            <%= cat._id %>
+                                        </strong></td>
+                                    <td>
+                                        <%= cat.total %>
+                                    </td>
+                                    <td class="text-success">
+                                        <%= cat.resolved %>
+                                    </td>
+                                    <td class="text-warning">
+                                        <%= cat.pending %>
+                                    </td>
+                                    <td>
+                                        <div class="progress-bar-small">
+                                            <div class="progress-fill"
+                                                style="width: <%= cat.total > 0 ? (cat.resolved / cat.total * 100) : 0 %>%">
+                                            </div>
+                                        </div>
+                                        <%= cat.total> 0 ? Math.round((cat.resolved / cat.total) * 100) : 0 %>%
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SLA Compliance -->
+            <div class="section">
+                <h2>⏱️ SLA Compliance Overview</h2>
+                <div class="sla-compliance-grid">
+                    <div class="compliance-card compliance-success">
+                        <h3>
+                            <%= slaCompliance.onTime %>
+                        </h3>
+                        <p>✅ On-Time Resolutions</p>
+                    </div>
+                    <div class="compliance-card compliance-danger">
+                        <h3>
+                            <%= slaCompliance.delayed %>
+                        </h3>
+                        <p>⚠️ Delayed Resolutions</p>
+                    </div>
+                    <div class="compliance-card compliance-warning">
+                        <h3>
+                            <%= slaCompliance.pending %>
+                        </h3>
+                        <p>⏳ Pending Issues</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Area Distribution -->
+            <div class="section">
+                <h2>📍 Top 10 Areas by Issue Count</h2>
+                <div class="area-list">
+                    <% areaStats.forEach((area, index)=> { %>
+                        <div class="area-item">
+                            <span class="area-rank">#<%= index + 1 %></span>
+                            <span class="area-name">
+                                <%= area._id %>
+                            </span>
+                            <span class="area-count">
+                                <%= area.count %> issues
+                            </span>
+                        </div>
+                        <% }) %>
+                </div>
+            </div>
+
+            <!-- Recent Resolutions -->
+            <div class="section">
+                <h2>🆕 Recently Resolved Issues</h2>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Issue ID</th>
+                                <th>Category</th>
+                                <th>Location</th>
+                                <th>Resolution Time</th>
+                                <th>Closed On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% recentResolved.forEach(issue=> { %>
+                                <tr>
+                                    <td><strong>
+                                            <%= issue.issueId %>
+                                        </strong></td>
+                                    <td><span class="badge badge-info">
+                                            <%= issue.category %>
+                                        </span></td>
+                                    <td><small>
+                                            <%= issue.location.address.substring(0, 50) %>...
+                                        </small></td>
+                                    <td>
+                                        <%= issue.resolutionTime %> hours
+                                    </td>
+                                    <td>
+                                        <%= new Date(issue.closedAt).toLocaleDateString() %>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Public Footer -->
+        <div class="public-footer">
+            <p>🏛️ CivicTrack - Transparent Municipal Governance</p>
+            <p>&copy; 2024 G. Pullaiah College of Engineering and Technology</p>
+        </div>
+    </div>
+
+    <script>
+        // Category Chart
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(categoryCtx, {
+            type: 'bar',
+            data: {
+                labels: <%= JSON.stringify(categoryStats.map(c => c._id)) %>,
+                datasets: [{
+                    label: 'Total',
+                    data: <%= JSON.stringify(categoryStats.map(c => c.total)) %>,
+                    backgroundColor: 'rgba(30, 109, 181, 0.7)'
+                }, {
+                    label: 'Resolved',
+                    data: <%= JSON.stringify(categoryStats.map(c => c.resolved)) %>,
+                    backgroundColor: 'rgba(34, 197, 94, 0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Status Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'pie',
+            data: {
+                labels: <%= JSON.stringify(statusStats.map(s => s._id)) %>,
+                datasets: [{
+                    data: <%= JSON.stringify(statusStats.map(s => s.count)) %>,
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(99, 102, 241, 0.7)',
+                        'rgba(34, 197, 94, 0.7)',
+                        'rgba(156, 163, 175, 0.7)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true
+            }
+        });
+    </script>
+</body>
+
+</html>

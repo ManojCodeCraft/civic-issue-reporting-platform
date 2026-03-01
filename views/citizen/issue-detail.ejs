@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .priority-critical {
+            background: #fee2e2;
+            color: #991b1b;
+            font-weight: 700;
+        }
+
+        .priority-high {
+            background: #fed7aa;
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+    </style>
+
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container">
+            <div class="page-header">
+                <h1>🔍 Issue Details</h1>
+                <a href="/citizen/view-issues" class="btn btn-secondary">← Back to Issues</a>
+            </div>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <div class="detail-container">
+                        <!-- Main Info -->
+                        <div class="detail-card">
+                            <div class="detail-header">
+                                <h2>
+                                    <%= issue.issueId %>
+                                </h2>
+                                <span class="badge badge-<%= issue.status.toLowerCase().replace(/ /g, '-') %>">
+                                    <%= issue.status %>
+                                </span>
+                            </div>
+
+                            <div class="detail-grid">
+                                <!-- ADD THIS NEW ITEM FIRST -->
+                                <div class="detail-item">
+                                    <strong>AI Priority:</strong>
+                                    <% let priorityClass='priority-low' ; let priorityIcon='🔵' ; if
+                                        (issue.priority==='Critical' ) { priorityClass='priority-critical' ;
+                                        priorityIcon='🚨' ; } else if (issue.priority==='High' ) {
+                                        priorityClass='priority-high' ; priorityIcon='🔥' ; } else if
+                                        (issue.priority==='Medium' ) { priorityClass='priority-medium' ;
+                                        priorityIcon='⚠️' ; } %>
+                                        <span class="badge <%= priorityClass %>"
+                                            style="margin-top: 6px; display: inline-block;">
+                                            <%= priorityIcon %>
+                                                <%= issue.priority %>
+                                        </span>
+                                </div>
+                                <div class="detail-item">
+                                    <strong>Category:</strong>
+                                    <span class="badge badge-info">
+                                        <%= issue.category %>
+                                    </span>
+                                </div>
+
+                                <div class="detail-item">
+                                    <strong>Submitted On:</strong>
+                                    <%= new Date(issue.createdAt).toLocaleString() %>
+                                </div>
+
+                                <div class="detail-item">
+                                    <strong>SLA Deadline:</strong>
+                                    <% if (issue.isOverdue) { %>
+                                        <span class="badge badge-danger">⚠️ Overdue</span>
+                                        <% } else { %>
+                                            <%= new Date(issue.slaDeadline).toLocaleString() %>
+                                                <% } %>
+                                </div>
+
+                                <% if (issue.assignedTo) { %>
+                                    <div class="detail-item">
+                                        <strong>Assigned To:</strong>
+                                        <%= issue.assignedTo.name %> (<%= issue.assignedTo.department %>)
+                                    </div>
+                                    <% } %>
+
+                                        <% if (issue.resolutionTime) { %>
+                                            <div class="detail-item">
+                                                <strong>Resolution Time:</strong>
+                                                <%= issue.resolutionTime %> hours
+                                            </div>
+                                            <% } %>
+                            </div>
+                            <!-- ADD AI INSIGHTS SECTION AFTER detail-section -->
+                            <% if (issue.aiAnalysis && issue.aiAnalysis.suggestedCategory) { %>
+                                <div class="detail-section"
+                                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; margin-top: 24px;">
+                                    <h3 style="color: white; margin-bottom: 16px;">🤖 AI Analysis</h3>
+
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                                        <div
+                                            style="background: rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 8px;">
+                                            <small style="opacity: 0.8; font-size: 11px;">SUGGESTED CATEGORY</small>
+                                            <div style="font-weight: 600; margin-top: 4px;">
+                                                <%= issue.aiAnalysis.suggestedCategory %>
+                                            </div>
+                                            <small style="opacity: 0.7; font-size: 11px;">
+                                                <%= issue.aiAnalysis.categoryConfidence %>% confidence
+                                            </small>
+                                        </div>
+
+                                        <div
+                                            style="background: rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 8px;">
+                                            <small style="opacity: 0.8; font-size: 11px;">SENTIMENT</small>
+                                            <div style="font-weight: 600; margin-top: 4px; text-transform: capitalize;">
+                                                <%= issue.aiAnalysis.sentiment %>
+                                            </div>
+                                            <small style="opacity: 0.7; font-size: 11px;">Score: <%=
+                                                    issue.aiAnalysis.sentimentScore %></small>
+                                        </div>
+
+                                        <div
+                                            style="background: rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 8px;">
+                                            <small style="opacity: 0.8; font-size: 11px;">URGENCY</small>
+                                            <div style="font-weight: 600; margin-top: 4px;">
+                                                <%= issue.aiAnalysis.urgency %>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            style="background: rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 8px;">
+                                            <small style="opacity: 0.8; font-size: 11px;">PRIORITY SCORE</small>
+                                            <div style="font-weight: 600; margin-top: 4px;">
+                                                <%= issue.aiAnalysis.priorityScore %>/7
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <% if (issue.aiAnalysis.keywords && issue.aiAnalysis.keywords.length> 0) { %>
+                                        <div style="margin-top: 16px;">
+                                            <small style="opacity: 0.8; font-size: 11px;">KEY TOPICS</small>
+                                            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                                                <% issue.aiAnalysis.keywords.slice(0, 6).forEach(keyword=> { %>
+                                                    <span
+                                                        style="background: rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 12px; font-size: 12px;">
+                                                        <%= keyword %>
+                                                    </span>
+                                                    <% }) %>
+                                            </div>
+                                        </div>
+                                        <% } %>
+
+                                            <small
+                                                style="opacity: 0.6; font-size: 11px; display: block; margin-top: 12px;">
+                                                Analyzed: <%= new Date(issue.aiAnalysis.analyzedAt).toLocaleString() %>
+                                            </small>
+                                </div>
+                                <% } %>
+
+
+                                    <div class="detail-section">
+                                        <h3>Description</h3>
+                                        <p>
+                                            <%= issue.description %>
+                                        </p>
+                                    </div>
+
+                                    <div class="detail-section">
+                                        <h3>Location</h3>
+                                        <p>📍 <%= issue.location.address %>
+                                        </p>
+                                        <% if (issue.location.coordinates.latitude &&
+                                            issue.location.coordinates.longitude) { %>
+                                            <p><small>Coordinates: <%= issue.location.coordinates.latitude %>, <%=
+                                                            issue.location.coordinates.longitude %></small></p>
+                                            <% } %>
+                                    </div>
+
+                                    <% if (issue.photo) { %>
+                                        <div class="detail-section">
+                                            <h3>Photo Evidence</h3>
+                                            <img src="<%= issue.photo %>" alt="Issue Photo" class="issue-photo">
+                                        </div>
+                                        <% } %>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div class="timeline-card">
+                            <h3>📅 Issue Timeline</h3>
+                            <div class="timeline">
+                                <% issue.timeline.forEach(entry=> { %>
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker"></div>
+                                        <div class="timeline-content">
+                                            <h4>
+                                                <%= entry.status %>
+                                            </h4>
+                                            <p>
+                                                <%= entry.remarks %>
+                                            </p>
+                                            <% if (entry.evidence) { %>
+                                                <img src="<%= entry.evidence %>" alt="Evidence"
+                                                    class="timeline-evidence">
+                                                <% } %>
+                                                    <small>
+                                                        By <%= entry.updatedBy.name %> (<%= entry.updatedBy.role %>)
+                                                                on <%= new Date(entry.timestamp).toLocaleString() %>
+                                                    </small>
+                                        </div>
+                                    </div>
+                                    <% }) %>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+
+        <%- include('../partials/footer') %>
+</body>
+
+</html>

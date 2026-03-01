@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %> - CivicTrack
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        .priority-critical {
+            background: #fee2e2;
+            color: #991b1b;
+            font-weight: 700;
+        }
+
+        .priority-high {
+            background: #fed7aa;
+            color: #ea580c;
+            font-weight: 700;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+        }
+
+        .priority-low {
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .row-overdue {
+            background: #fef2f2 !important;
+            border-left: 4px solid #dc2626;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <div class="container">
+            <div class="page-header">
+                <h1>📋 Manage Issues</h1>
+                <p>All issues assigned to you</p>
+            </div>
+
+            <% if (error && error.length> 0) { %>
+                <div class="alert alert-error">
+                    <%= error %>
+                </div>
+                <% } %>
+
+                    <% if (success && success.length> 0) { %>
+                        <div class="alert alert-success">
+                            <%= success %>
+                        </div>
+                        <% } %>
+
+                            <!-- Filters -->
+                            <div class="filters-section">
+                                <form method="GET" action="/authority/manage-issues" class="filters-form">
+                                    <div class="filter-group">
+                                        <label for="priority">Priority</label>
+                                        <select id="priority" name="priority" onchange="this.form.submit()">
+                                            <option value="">All Priorities</option>
+                                            <option value="Critical" <%=currentFilter.priority==='Critical' ? 'selected'
+                                                : '' %>>🚨 Critical</option>
+                                            <option value="High" <%=currentFilter.priority==='High' ? 'selected' : '' %>
+                                                >🔥 High</option>
+                                            <option value="Medium" <%=currentFilter.priority==='Medium' ? 'selected'
+                                                : '' %>>⚠️ Medium</option>
+                                            <option value="Low" <%=currentFilter.priority==='Low' ? 'selected' : '' %>
+                                                >🔵 Low</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <label for="status">Status</label>
+                                        <select id="status" name="status" onchange="this.form.submit()">
+                                            <option value="">All Statuses</option>
+                                            <% Object.values(statuses).forEach(status=> { %>
+                                                <option value="<%= status %>" <%=currentFilter.status===status
+                                                    ? 'selected' : '' %>>
+                                                    <%= status %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <label for="category">Category</label>
+                                        <select id="category" name="category" onchange="this.form.submit()">
+                                            <option value="">All Categories</option>
+                                            <% Object.values(categories).forEach(category=> { %>
+                                                <option value="<%= category %>" <%=currentFilter.category===category
+                                                    ? 'selected' : '' %>>
+                                                    <%= category %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <label>
+                                            <input type="checkbox" name="overdue" value="true"
+                                                <%=currentFilter.overdue==='true' ? 'checked' : '' %>
+                                            onchange="this.form.submit()">
+                                            Show Only Overdue
+                                        </label>
+                                    </div>
+
+                                    <button type="button" class="btn btn-secondary"
+                                        onclick="window.location.href='/authority/manage-issues'">
+                                        Clear Filters
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Issues Table -->
+                            <% if (issues.length> 0) { %>
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Priority</th>
+                                                <th>Issue ID</th>
+                                                <th>Category</th>
+                                                <th>Citizen</th>
+                                                <th>Location</th>
+                                                <th>Status</th>
+                                                <th>SLA</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% issues.forEach(issue=> { %>
+                                                <tr class="<%= issue.isOverdue ? 'row-overdue' : '' %>">
+                                                    <td>
+                                                        <% let priorityClass='priority-low' ; let priorityIcon='🔵' ; if
+                                                            (issue.priority==='Critical' ) {
+                                                            priorityClass='priority-critical' ; priorityIcon='🚨' ; }
+                                                            else if (issue.priority==='High' ) {
+                                                            priorityClass='priority-high' ; priorityIcon='🔥' ; } else
+                                                            if (issue.priority==='Medium' ) {
+                                                            priorityClass='priority-medium' ; priorityIcon='⚠️' ; } %>
+                                                            <span class="badge <%= priorityClass %>">
+                                                                <%= priorityIcon %>
+                                                                    <%= issue.priority %>
+                                                            </span>
+                                                    </td>
+                                                    <td><strong>
+                                                            <%= issue.issueId %>
+                                                        </strong></td>
+                                                    <td><span class="badge badge-info">
+                                                            <%= issue.category %>
+                                                        </span></td>
+                                                    <td>
+                                                        <%= issue.citizen.name %><br>
+                                                            <small>
+                                                                <%= issue.citizen.phone %>
+                                                            </small>
+                                                    </td>
+                                                    <td><small>
+                                                            <%= issue.location.address.substring(0, 50) %>...
+                                                        </small></td>
+                                                    <td>
+                                                        <span
+                                                            class="badge badge-<%= issue.status.toLowerCase().replace(/ /g, '-') %>">
+                                                            <%= issue.status %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <% if (issue.isOverdue) { %>
+                                                            <span class="badge badge-danger">⚠️ Overdue</span>
+                                                            <% } else { %>
+                                                                <%= new Date(issue.slaDeadline).toLocaleDateString() %>
+                                                                    <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <a href="/authority/issue/<%= issue._id %>"
+                                                            class="btn btn-sm btn-primary">
+                                                            Manage
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <% } else { %>
+                                    <div class="empty-state">
+                                        <p>📭 No issues found</p>
+                                    </div>
+                                    <% } %>
+
+                                        <%- include('../partials/footer') %>
+</body>
+
+</html>
