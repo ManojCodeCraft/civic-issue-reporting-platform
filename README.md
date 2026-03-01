@@ -710,20 +710,20 @@ We welcome contributions! Please follow these steps:
 
 ### **Project Team**
 
-**Student:** [Your Name]  
-**Roll Number:** [Your Roll Number]  
+**Student:** Aulakagari Manoj Kumar 
+**Roll Number:** 22AT1A0508 
 **Department:** Computer Science and Engineering  
 **Institution:** G. Pullaiah College of Engineering and Technology, Kurnool
 
-**Project Guide:** [Guide Name]  
+**Project Guide:** Dr.C.Ranjeeth Kumar Dean-Innovation & Entrepreneurship || AI Skill Development Head & Trainer- RMJIT Solutions || Thesis Supervisor@GGU, CA || NVIDIA Certified Coach-Generative AI & LLMs || NVIDIA certified instructor   
 **Department:** Computer Science and Engineering
 
 ### **Contact**
 
-- 📧 Email: [your.email@example.com]
-- 🔗 LinkedIn: [Your LinkedIn]
-- 🌐 Portfolio: [Your Portfolio]
-- 💻 GitHub: [Your GitHub]
+- 📧 Email: aulakagarimanojkumar@gmail.com
+- 🔗 LinkedIn:https://www.linkedin.com/in/manoj-kumar-a-21ab69258/
+- 🌐 Portfolio:https://portfolio-manojkumar-developer.vercel.app/
+- 💻 GitHub:https://github.com/ManojCodeCraft
 
 ---
 
@@ -826,7 +826,7 @@ Development Time:   6 months
 
 ## 🌟 If you found this project helpful, please give it a ⭐!
 
-**Built with ❤️ by [Your Name]**
+**Built with ❤️ by A Manoj Kumar**
 
 **For academic and educational purposes**
 
@@ -834,7 +834,7 @@ Development Time:   6 months
 
 **📧 Questions? Feedback? Reach out!**
 
-[Email](mailto:your.email@example.com) • [LinkedIn](https://linkedin.com/in/yourprofile) • [GitHub](https://github.com/yourusername)
+[Email](aulakagarimanojkumar@gmail.com) • [LinkedIn](https://www.linkedin.com/in/manoj-kumar-a-21ab69258/)• [GitHub]([https://github.com/yourusername](https://github.com/ManojCodeCraft))
 
 </div>
 
