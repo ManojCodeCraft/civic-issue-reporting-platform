@@ -584,33 +584,6 @@ Response: {
 }
 ```
 
----
-
-## 📸 Screenshots
-
-### Homepage
-![Homepage](docs/screenshots/homepage.png)
-
-### Voice Recording (Multi-language)
-![Voice Recording](docs/screenshots/voice-recording.png)
-
-### AI Transcription
-![AI Transcription](docs/screenshots/ai-transcription.png)
-
-### Interactive Map
-![Map View](docs/screenshots/map.png)
-
-### Predictive Analytics Dashboard
-![Analytics](docs/screenshots/analytics.png)
-
-### Authority Performance Leaderboard
-![Performance](docs/screenshots/performance.png)
-
-### Real-time Notifications
-![Notifications](docs/screenshots/notifications.png)
-
----
-
 ## 🤖 ML & AI Features
 
 ### **1. Voice Processing Pipeline**
